@@ -1,0 +1,33 @@
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "quoted"
+version = "0.1.0"
+description = "Feed your brain with the best quotes from multiple web portals."
+authors = ["Rodrigo Cares <rcares@gmail.com>"]
+maintainers = ["Rodrigo Cares <rcares@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = ""
+repository = "https://github.com/rcares/quoted/"
+documentation = "https://github.com/rcares/quoted/"
+keywords = ["Quote",
+            "Motivation",
+            "Words",
+            "Reflect",
+            "Meditate"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+scrapy = "^2.1.0"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+quoted = "quoted.quoted:main"
+
+[tool.poetry.urls]
+issues = "https://github.com/rcares/quoted/issues"
+source = "https://github.com/rcares/quoted/"
