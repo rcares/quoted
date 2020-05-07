@@ -10,6 +10,7 @@ Feed your brain with the best quotes from multiple web portals.
 ```
 git
 python 3x
+poetry
 ```
 
 ## Installation
@@ -17,7 +18,7 @@ python 3x
 ### Linux/MacOS
 
 ```
-$ git clone https://github.com/rcares/quoted.git
+$ pip install quoted
 ```
 
 ### Windows
@@ -31,12 +32,35 @@ $ quoted
 "If you want to find the secrets of the universe, think in terms of energy, frequency and vibration."
 		--Nikola Tesla
 ```
+## Development
+
+### Run
+
+```
+$ poetry run quoted
+```
+
+### Build
+
+```
+$ poetry build
+```
+
+The distribution packages are located in `dist` directory.
+
+### Publish
+
+```
+$ poetry publish
+```
 
 ## Todo
+
 * Multiple WEB sources - [scrapy](https://scrapy.org/)
 * Cache
 * Colored Output - [rich](https://github.com/willmcgugan/rich)
 * Supports `bash` and `zsh`
 
 ## Contribution
+
 * File bugs, feature requests in [GitHub Issues](https://github.com/rcares/quoted/issues).
