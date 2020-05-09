@@ -4,6 +4,7 @@ Feed your brain with the best quotes from multiple web portals.
 
 ## Features
 
+* Multiple WEB sources
 
 ## Requirements
 
@@ -29,14 +30,22 @@ $ pip install quoted
 ```
 $ quoted
 
-"If you want to find the secrets of the universe, think in terms of energy, frequency and vibration."
-		--Nikola Tesla
+“Insanity is doing the same thing, over and over again, but expecting different results.”
+―― Narcotics Anonymous
+
+tags: humor, insanity, life, misattributed-ben-franklin, misattributed-mark-twain, misattributed-to-einstein
+link: https://www.goodreads.com/quotes/5543-insanity-is-doing-the-same-thing-over-and-over-again
+
+© goodreads
+
+Powered by quoted
 ```
 ## Development
 
 ### Run
 
 ```
+$ poetry install
 $ poetry run quoted
 ```
 
@@ -54,12 +63,27 @@ The distribution packages are located in `dist` directory.
 $ poetry publish
 ```
 
+### Spiders
+
+Spider output is a list of dicts with the structure:
+```
+[
+    {
+        'author': 'Author Name',
+        'text': 'Text of Quote',
+        'tags': ['tag1','tag2'],
+        'url': 'https://www.quotesource.com/linktoquote'
+    }
+]
+```
+
 ## Todo
 
-* Multiple WEB sources - [scrapy](https://scrapy.org/)
 * Cache
 * Colored Output - [rich](https://github.com/willmcgugan/rich)
 * Supports `bash` and `zsh`
+* Logs
+* Output formats
 
 ## Contribution
 
