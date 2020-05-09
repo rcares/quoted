@@ -1,12 +1,29 @@
 import io
 import json
 import random
+import logging
 from scrapy.crawler import CrawlerProcess
+from rich.console import Console
+from rich.logging import RichHandler
 # spiders
 from quoted.scrapy.spiders import toscrape, brainyquote, goodreads
 
+# Logging
+logger = logging.getLogger(__name__)
+
 # Buffer
 bytestream = io.BytesIO()
+
+
+def init_logging(log_level=logging.CRITICAL):
+    FORMAT = "%(message)s"
+    logging.basicConfig(
+        level=log_level,
+        format=FORMAT, datefmt="[%X] ",
+        handlers=[RichHandler(level=log_level)]
+    )
+
+    return logging.getLogger(__name__)
 
 
 def get_spider():
@@ -50,32 +67,44 @@ def do_crawl(spider):
 
 def get_quote_from_json_stream(stream):
     stream_value = stream.getvalue()
-    # print(stream_value)
+    logger.debug(stream_value)
     quotes = json.loads(stream_value)
-    # print(quotes)
+    logger.debug(quotes)
     quote_selector = random.randint(1, len(quotes)-1)
 
     return quotes[quote_selector]
 
 
 def main():
+    print_styles = {
+        "text": "italic",
+        "author": "bold"
+    }
+
+    logger = init_logging(logging.CRITICAL)
+    console = Console()
+
     spider = get_spider()
     do_crawl(spider)
 
     try:
         quote = get_quote_from_json_stream(bytestream)
 
-        print("\n“%s”" % quote["text"])
-        print("―― %s\n" % quote["author"])
-        print("tags: %s" % ', '.join(quote["tags"]))
-        print("link: %s\n" % quote["url"])
-        print("© %s\n" % spider.name)
-        print("Powered by quoted")
+        console.print("")
+        console.print("“%s”" % quote["text"], style=print_styles["text"])
+        console.print("―― %s" % quote["author"], style=print_styles["author"])
+        console.print("")
+        console.print("tags: %s" % ', '.join(quote["tags"]))
+        console.print("link: %s" % quote["url"])
+        console.print("")
+        console.print("© %s" % spider.name)
+        console.print("")
+        console.print("Powered by quoted")
 
     except json.JSONDecodeError:
-        print("JSONDecodeError: Failed parsing json response!")
+        logger.error("JSONDecodeError: Failed parsing json response!")
     except TypeError:
-        print("TypeError: Failed parsing json response!")
+        logger.error("TypeError: Failed parsing json response!")
 
 
 if __name__ == "__main__":
