@@ -1,10 +1,12 @@
 # quoted
 
-Feed your brain with the best quotes from multiple web portals.
+Feed your brain with the best random quotes from multiple web portals.
 
 ## Features
 
 * Multiple WEB sources
+* Rich Text
+* Logs
 
 ## Requirements
 
@@ -79,10 +81,9 @@ Spider output is a list of dicts with the structure:
 
 ## Todo
 
+* Argument options
 * Cache
-* Colored Output - [rich](https://github.com/willmcgugan/rich)
 * Supports `bash` and `zsh`
-* Logs
 * Output formats
 
 ## Contribution
