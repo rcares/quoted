@@ -2,6 +2,7 @@ import io
 import json
 import random
 import logging
+from importlib_metadata import version, PackageNotFoundError
 import click
 from scrapy.crawler import CrawlerProcess
 from rich.console import Console
@@ -97,6 +98,7 @@ def get_quote_from_json_stream(stream):
 )
 @click.option(
     '--log-level',
+    '-l',
     help='Set log level',
     type=click.Choice(
         [
@@ -111,7 +113,20 @@ def get_quote_from_json_stream(stream):
     ),
     default='CRITICAL'
 )
-def main(rich_text=True, show_tags=True, show_link=True, log_level="CRITICAL"):
+@click.option(
+    '--version',
+    '-v',
+    'show_version',
+    help='Print version information and quit',
+    is_flag=True
+)
+def main(
+    rich_text=True,
+    show_tags=True,
+    show_link=True,
+    log_level="CRITICAL",
+    show_version=False
+):
     """Feed your brain with the best random quotes from multiple web portals"""
     print_styles = {
         "text": "italic",
@@ -126,6 +141,15 @@ def main(rich_text=True, show_tags=True, show_link=True, log_level="CRITICAL"):
 
     logger = init_logging(log_level)
     console = Console()
+
+    if show_version:
+        quoted_version = 'master'
+        try:
+            quoted_version = version('quoted')
+        except PackageNotFoundError:
+            logger.debug("PackageNotFoundError: quoted version not found")
+        console.print('Quoted version %s' % quoted_version)
+        exit()
 
     spider = get_spider()
     do_crawl(spider)
