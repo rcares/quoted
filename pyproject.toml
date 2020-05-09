@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "quoted"
-version = "0.1.0"
+version = "0.3.0"
 description = "Feed your brain with the best random quotes from multiple web portals."
 authors = ["Rodrigo Cares <rcares@gmail.com>"]
 maintainers = ["Rodrigo Cares <rcares@gmail.com>"]
@@ -24,6 +24,7 @@ python = "^3.6"
 scrapy = "^2.1.0"
 rich = "^1.0.3"
 click = "^7.1.2"
+importlib-metadata = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 
