@@ -2,6 +2,8 @@ import io
 import json
 import random
 import logging
+import shutil
+from pathlib import Path
 from importlib_metadata import version, PackageNotFoundError
 import click
 from scrapy.crawler import CrawlerProcess
@@ -12,6 +14,10 @@ from quoted.scrapy.spiders import toscrape, brainyquote, goodreads
 
 # Logging
 logger = logging.getLogger(__name__)
+
+# Paths
+QUOTED_DIR = str(Path.home().joinpath('.quoted'))
+QUOTED_CACHE_DIR = str(Path(QUOTED_DIR).joinpath('cache'))
 
 # Buffer
 bytestream = io.BytesIO()
@@ -39,11 +45,19 @@ def get_spider():
     return spiders[spider_selector]
 
 
-def do_crawl(spider, cache=0):
+def do_crawl(spider, cache=0, cache_dir='httpcache'):
     """
     Crawl web sites to get quotes using scrapy spiders.
     module: quoted.quoted.spiders
     """
+    if Path(cache_dir).is_absolute():
+        """
+        If cache_dir is relative scrapy create a .scrapy/<cache_dir>
+        directory relative to project dir.
+        https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-dir
+        """
+        Path(cache_dir).mkdir(parents=True, exist_ok=True)
+
     process = CrawlerProcess(settings={
         "LOG_ENABLED": False,
         "TELNETCONSOLE_ENABLED": False,
@@ -51,6 +65,7 @@ def do_crawl(spider, cache=0):
         "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage',
         "HTTPCACHE_POLICY": 'scrapy.extensions.httpcache.DummyPolicy',
         "HTTPCACHE_EXPIRATION_SECS": cache,
+        "HTTPCACHE_DIR": cache_dir,
         "HTTPCACHE_GZIP": True,
         "FEED_STORAGES": {
             'buffered': 'quoted.scrapy.extensions.storage.BufferedFeedStorage',
@@ -80,6 +95,51 @@ def get_quote_from_json_stream(stream):
     quote_selector = random.randint(1, len(quotes)-1)
 
     return quotes[quote_selector]
+
+
+def do_show_version(console, logger):
+    quoted_version = 'master'
+    try:
+        quoted_version = version('quoted')
+    except PackageNotFoundError:
+        logger.debug("PackageNotFoundError: quoted version not found")
+    console.print('Quoted version %s' % quoted_version)
+    exit()
+
+
+def do_cache_clear(console, logger):
+    try:
+        if Path(QUOTED_CACHE_DIR).is_dir():
+            shutil.rmtree(Path(QUOTED_CACHE_DIR))
+    except Exception:
+        logger.critical(
+            'Exception: An error ocurred when try delete %s directory'
+            %
+            QUOTED_CACHE_DIR
+        )
+        exit()
+    console.print(':wastebasket: Cache cleared')
+    exit()
+
+
+def do_print_quote(quote, spider, show_tags, show_link, console, print_styles):
+    console.print("")
+    console.print(
+        "“%s”" % quote["text"],
+        style=print_styles["text"],
+        highlight=False
+    )
+    console.print("―― %s" % quote["author"], style=print_styles["author"])
+    console.print("")
+    if show_tags:
+        console.print("tags: %s" % ', '.join(quote["tags"]))
+    if show_link:
+        console.print("link: %s" % quote["url"])
+    if show_tags or show_link:
+        console.print("")
+    console.print("© %s" % spider.name)
+    console.print("")
+    console.print("Powered by quoted")
 
 
 @click.command()
@@ -136,15 +196,19 @@ def get_quote_from_json_stream(stream):
     default=86400,  # one day
     show_default=True
 )
-# TODO: option to clear cache directory
-# TODO: set cache directory
+@click.option(
+    '--cache-clear',
+    help='Clear data from cache directory (%s)' % QUOTED_CACHE_DIR,
+    is_flag=True
+)
 def main(
     rich_text=True,
     show_tags=True,
     show_link=True,
     log_level="CRITICAL",
     show_version=False,
-    cache=86400
+    cache=86400,
+    cache_clear=False
 ):
     """Feed your brain with the best random quotes from multiple web portals"""
     print_styles = {
@@ -162,37 +226,25 @@ def main(
     console = Console()
 
     if show_version:
-        quoted_version = 'master'
-        try:
-            quoted_version = version('quoted')
-        except PackageNotFoundError:
-            logger.debug("PackageNotFoundError: quoted version not found")
-        console.print('Quoted version %s' % quoted_version)
-        exit()
+        do_show_version(console=console, logger=logger)
+
+    if cache_clear:
+        do_cache_clear(console, logger)
 
     spider = get_spider()
-    do_crawl(spider, cache)
+    do_crawl(spider, cache, QUOTED_CACHE_DIR)
 
     try:
         quote = get_quote_from_json_stream(bytestream)
 
-        console.print("")
-        console.print(
-            "“%s”" % quote["text"],
-            style=print_styles["text"],
-            highlight=False
+        do_print_quote(
+            quote,
+            spider,
+            show_tags,
+            show_link,
+            console,
+            print_styles
         )
-        console.print("―― %s" % quote["author"], style=print_styles["author"])
-        console.print("")
-        if show_tags:
-            console.print("tags: %s" % ', '.join(quote["tags"]))
-        if show_link:
-            console.print("link: %s" % quote["url"])
-        if show_tags or show_link:
-            console.print("")
-        console.print("© %s" % spider.name)
-        console.print("")
-        console.print("Powered by quoted")
 
     except json.JSONDecodeError:
         logger.error("JSONDecodeError: Failed parsing json response!")
