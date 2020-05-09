@@ -6,6 +6,7 @@ Feed your brain with the best random quotes from multiple web portals.
 
 * Multiple WEB sources
 * Rich Text
+* Argument options
 * Logs
 
 ## Requirements
@@ -81,7 +82,6 @@ Spider output is a list of dicts with the structure:
 
 ## Todo
 
-* Argument options
 * Cache
 * Supports `bash` and `zsh`
 * Output formats
