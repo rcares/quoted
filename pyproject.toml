@@ -23,6 +23,7 @@ keywords = ["Quote",
 python = "^3.6"
 scrapy = "^2.1.0"
 rich = "^1.0.3"
+click = "^7.1.2"
 
 [tool.poetry.dev-dependencies]
 
