@@ -39,7 +39,7 @@ def get_spider():
     return spiders[spider_selector]
 
 
-def do_crawl(spider):
+def do_crawl(spider, cache=0):
     """
     Crawl web sites to get quotes using scrapy spiders.
     module: quoted.quoted.spiders
@@ -47,6 +47,11 @@ def do_crawl(spider):
     process = CrawlerProcess(settings={
         "LOG_ENABLED": False,
         "TELNETCONSOLE_ENABLED": False,
+        "HTTPCACHE_ENABLED": False if cache == 0 else True,
+        "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage',
+        "HTTPCACHE_POLICY": 'scrapy.extensions.httpcache.DummyPolicy',
+        "HTTPCACHE_EXPIRATION_SECS": cache,
+        "HTTPCACHE_GZIP": True,
         "FEED_STORAGES": {
             'buffered': 'quoted.scrapy.extensions.storage.BufferedFeedStorage',
         },
@@ -82,19 +87,22 @@ def get_quote_from_json_stream(stream):
     '--rich-text/--no-rich-text',
     ' /-R',
     help='Rich Text support',
-    default=True
+    default=True,
+    show_default=True
 )
 @click.option(
     '--show-tags/--no-show-tags',
     ' /-T',
     help='Show or Hide quote tags',
-    default=True
+    default=True,
+    show_default=True
 )
 @click.option(
     '--show-link/--no-show-link',
     ' /-L',
     help='Show or Hide quote link',
-    default=True
+    default=True,
+    show_default=True
 )
 @click.option(
     '--log-level',
@@ -111,7 +119,8 @@ def get_quote_from_json_stream(stream):
         ],
         case_sensitive=False
     ),
-    default='CRITICAL'
+    default='CRITICAL',
+    show_default=True
 )
 @click.option(
     '--version',
@@ -120,12 +129,22 @@ def get_quote_from_json_stream(stream):
     help='Print version information and quit',
     is_flag=True
 )
+@click.option(
+    '--cache',
+    help='Cache expiration in seconds (0 means disabled)',
+    type=int,
+    default=86400,  # one day
+    show_default=True
+)
+# TODO: option to clear cache directory
+# TODO: set cache directory
 def main(
     rich_text=True,
     show_tags=True,
     show_link=True,
     log_level="CRITICAL",
-    show_version=False
+    show_version=False,
+    cache=86400
 ):
     """Feed your brain with the best random quotes from multiple web portals"""
     print_styles = {
@@ -152,7 +171,7 @@ def main(
         exit()
 
     spider = get_spider()
-    do_crawl(spider)
+    do_crawl(spider, cache)
 
     try:
         quote = get_quote_from_json_stream(bytestream)
