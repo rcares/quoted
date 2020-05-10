@@ -86,6 +86,7 @@ Spider output is a list of dicts with the structure:
 * Supports `bash` and `zsh`
 * Output formats
 * Tags filer
+* Site Selector
 
 ## Contribution
 
