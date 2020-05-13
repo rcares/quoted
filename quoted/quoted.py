@@ -40,7 +40,7 @@ def get_spider():
         brainyquote.QuotesSpider,
         goodreads.QuotesSpider
     ]
-    spider_selector = random.randint(1, len(spiders)-1)
+    spider_selector = random.randint(0, len(spiders)-1)
 
     return spiders[spider_selector]
 
@@ -92,7 +92,7 @@ def get_quote_from_json_stream(stream):
     logger.debug(stream_value)
     quotes = json.loads(stream_value)
     logger.debug(quotes)
-    quote_selector = random.randint(1, len(quotes)-1)
+    quote_selector = random.randint(0, len(quotes)-1)
 
     return quotes[quote_selector]
 
