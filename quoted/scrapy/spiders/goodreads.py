@@ -1,15 +1,22 @@
-import scrapy
 import random
+from . import QuotedSpider
 
 
-class QuotesSpider(scrapy.Spider):
+class QuotesSpider(QuotedSpider):
     name = 'goodreads'
     base_url = 'https://www.goodreads.com'
     page = random.randint(1, 100)
 
-    start_urls = [
-        base_url+'/quotes?page='+str(page),
-    ]
+    def update_from_cache(self):
+        self.start_urls = [
+            self.base_url+'/quotes?page='+str(self.page),
+        ]
+
+    def options_to_cache(self):
+        return {'page': self.page}
+
+    def options_from_cache(self, cache_config):
+        self.page = cache_config['options']['page']
 
     def parse(self, response):
         for quote in response.css('div.quote'):
