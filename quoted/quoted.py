@@ -10,7 +10,7 @@ from scrapy.crawler import CrawlerProcess
 from rich.console import Console
 from rich.logging import RichHandler
 # spiders
-from quoted.scrapy.spiders import toscrape, brainyquote, goodreads
+from .scrapy.spiders import toscrape, brainyquote, goodreads
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 # Paths
 QUOTED_DIR = str(Path.home().joinpath('.quoted'))
 QUOTED_CACHE_DIR = str(Path(QUOTED_DIR).joinpath('cache'))
+QUOTED_CACHE_CONFIG_FILE = str(
+    Path(QUOTED_CACHE_DIR).joinpath('settings.json')
+)
 
 # Buffer
 bytestream = io.BytesIO()
@@ -40,7 +43,7 @@ def get_spider():
         brainyquote.QuotesSpider,
         goodreads.QuotesSpider
     ]
-    spider_selector = random.randint(1, len(spiders)-1)
+    spider_selector = random.randint(0, len(spiders)-1)
 
     return spiders[spider_selector]
 
@@ -59,6 +62,7 @@ def do_crawl(spider, cache=0, cache_dir='httpcache'):
         Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
     process = CrawlerProcess(settings={
+        "QUOTED_CACHE_CONFIG_FILE": QUOTED_CACHE_CONFIG_FILE,
         "LOG_ENABLED": False,
         "TELNETCONSOLE_ENABLED": False,
         "HTTPCACHE_ENABLED": False if cache == 0 else True,
@@ -92,7 +96,7 @@ def get_quote_from_json_stream(stream):
     logger.debug(stream_value)
     quotes = json.loads(stream_value)
     logger.debug(quotes)
-    quote_selector = random.randint(1, len(quotes)-1)
+    quote_selector = random.randint(0, len(quotes)-1)
 
     return quotes[quote_selector]
 
